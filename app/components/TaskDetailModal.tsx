@@ -36,6 +36,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [assignee, setAssignee] = useState('');
   const [sectionId, setSectionId] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Reset form values when task changes
   React.useEffect(() => {
@@ -46,6 +47,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       setPriority(task.priority as 'high' | 'medium' | 'low');
       setAssignee(task.assignee);
       setSectionId(task.section);
+      setIsDeleting(false); // Reset deleting state when task changes
     }
   }, [task]);
 
@@ -58,11 +60,32 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
     if (!task) return;
 
+    // Convert date to ISO format if needed
+    let isoDate;
+    if (date) {
+      // Check if date is already in ISO format
+      if (date.includes('T')) {
+        isoDate = date;
+      } else {
+        // Parse YYYY-MM-DD to ISO string
+        try {
+          const [year, month, day] = date.split('-').map(num => parseInt(num, 10));
+          const dateObj = new Date(year, month - 1, day); // month is 0-indexed in JS Date
+          isoDate = dateObj.toISOString();
+        } catch (error) {
+          // If parsing fails, use the original date
+          isoDate = task.date;
+        }
+      }
+    } else {
+      isoDate = task.date;
+    }
+
     onSave({
       id: task.id,
       name,
       description,
-      date,
+      date: isoDate,
       priority,
       assignee,
       section: sectionId,
@@ -73,23 +96,36 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
   // Handle delete button press
   const handleDelete = () => {
+    console.log('[TaskDetailModal] handleDelete function called');
     if (!task) return;
-
-    Alert.alert(
-      'Delete Task',
-      'Are you sure you want to delete this task?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            onDelete(task.id);
-            onClose();
-          },
-        },
-      ]
-    );
+    
+    console.log(`TaskDetailModal: Attempting to delete task: ${task.id}`);
+    
+    // For web, use the native confirm dialog instead of Alert.alert which might not work well in web
+    if (confirm('Are you sure you want to delete this task?')) {
+      console.log(`[TaskDetailModal] User confirmed deletion of task: ${task.id}`);
+      
+      // Close the modal immediately to provide feedback
+      onClose();
+      
+      // Call the parent's delete handler
+      try {
+        console.log(`[TaskDetailModal] Calling onDelete with task ID: ${task.id}`);
+        onDelete(task.id);
+        
+        // Use setTimeout to show the success message after the deletion has time to process
+        setTimeout(() => {
+          console.log('[TaskDetailModal] Showing success message');
+          // Use alert instead of Alert.alert for web compatibility
+          alert('Task deleted successfully');
+        }, 500);
+      } catch (error) {
+        console.error('[TaskDetailModal] Error during deletion:', error);
+        alert('Failed to delete task');
+      }
+    } else {
+      console.log('[TaskDetailModal] User cancelled deletion');
+    }
   };
 
   // Render priority option buttons
@@ -229,8 +265,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           </ScrollView>
 
           <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-              <Text style={styles.deleteButtonText}>Delete</Text>
+            <TouchableOpacity 
+              style={[styles.deleteButton, isDeleting && styles.disabledButton]} 
+              onPress={handleDelete}
+              disabled={isDeleting}
+            >
+              <Text style={styles.deleteButtonText}>
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
               <Text style={styles.saveButtonText}>Save</Text>
@@ -366,6 +408,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
     fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
 

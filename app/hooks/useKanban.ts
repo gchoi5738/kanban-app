@@ -66,15 +66,23 @@ export const useUpdateTask = () => {
   });
 };
 
-// Hook for deleting a task
+// Hook for deleting a task - simplified
 export const useDeleteTask = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => api.deleteTask(id),
-    onSuccess: () => {
+    mutationFn: (id: string) => {
+      console.log(`[Hook] Deleting task: ${id}`);
+      return api.deleteTask(id);
+    },
+    onSuccess: (_, id) => {
+      console.log(`[Hook] Successfully deleted task: ${id}`);
+      // Just invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
+    onError: (error) => {
+      console.error(`[Hook] Error deleting task:`, error);
+    }
   });
 };
 

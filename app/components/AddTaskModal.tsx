@@ -73,10 +73,31 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({
       return;
     }
 
+    // Convert date to ISO format or use current date
+    let isoDate;
+    if (date) {
+      // Check if date is already in ISO format
+      if (date.includes('T')) {
+        isoDate = date;
+      } else {
+        // Parse YYYY-MM-DD to ISO string
+        try {
+          const [year, month, day] = date.split('-').map(num => parseInt(num, 10));
+          const dateObj = new Date(year, month - 1, day); // month is 0-indexed in JS Date
+          isoDate = dateObj.toISOString();
+        } catch (error) {
+          // If parsing fails, use current date
+          isoDate = new Date().toISOString();
+        }
+      }
+    } else {
+      isoDate = new Date().toISOString();
+    }
+
     onAdd({
       name,
       description,
-      date: date || new Date().toISOString(),
+      date: isoDate,
       priority,
       assignee,
       section: sectionId,

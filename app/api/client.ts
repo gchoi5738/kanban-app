@@ -5,16 +5,32 @@ const API_BASE_URL = 'http://localhost:5001/api';
 
 // Helper to handle API responses
 const handleResponse = async (response: Response) => {
+  console.log(`API Response: ${response.status} ${response.statusText}`);
+  
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || errorData.error || `API Error: ${response.status}`);
+    let errorMessage = `API Error: ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorData.error || errorMessage;
+      console.error('API Error Response:', errorData);
+    } catch (e) {
+      console.error('Error parsing error response:', e);
+    }
+    
+    throw new Error(errorMessage);
   }
   
   if (response.status === 204) {
+    console.log('204 No Content response - returning null');
     return null;
   }
   
-  return response.json();
+  try {
+    return await response.json();
+  } catch (e) {
+    console.error('Error parsing JSON response:', e);
+    return null;
+  }
 };
 
 // API functions
@@ -79,12 +95,36 @@ export const api = {
     return handleResponse(response);
   },
   
-  // Delete a task
-  deleteTask: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-      method: 'DELETE',
-    });
+  // Delete a task - simple direct implementation
+  deleteTask: async (id: string): Promise<void | null> => {
+    console.log(`[API] Deleting task: ${id}`);
     
-    return handleResponse(response);
+    try {
+      // Construct the full URL
+      const url = `${API_BASE_URL}/tasks/${id}`;
+      console.log(`[API] DELETE request to: ${url}`);
+      
+      // Direct DELETE request with minimal headers
+      const response = await fetch(url, {
+        method: 'DELETE',
+      });
+      
+      console.log(`[API] Delete response: ${response.status} ${response.statusText}`);
+      
+      if (response.status === 204) {
+        console.log('[API] Task deleted successfully');
+        return null;
+      }
+      
+      if (!response.ok) {
+        console.error('[API] Error status:', response.status);
+        throw new Error(`Failed to delete task: ${response.statusText}`);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('[API] Error in deleteTask:', error);
+      throw error;
+    }
   },
 }; 

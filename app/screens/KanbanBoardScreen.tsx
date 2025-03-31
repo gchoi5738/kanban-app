@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from 'react-native';
 import { DraxProvider } from 'react-native-drax';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -24,8 +25,18 @@ import TaskDetailModal from '../components/TaskDetailModal';
 import AddTaskModal from '../components/AddTaskModal';
 import FilterModal from '../components/FilterModal';
 
-// Create a query client
-const queryClient = new QueryClient();
+// Create a query client with basic configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 2,
+    }
+  }
+});
 
 // Wrap the component for React Query
 const KanbanBoardWithProvider = () => (
@@ -83,9 +94,22 @@ const KanbanBoardScreen: React.FC = () => {
     createTaskMutation.mutate(taskData);
   };
 
-  // Handle task deletion
+  // Handle task deletion - simplified direct approach
   const handleTaskDelete = (taskId: string) => {
-    deleteTaskMutation.mutate(taskId);
+    console.log(`[KanbanBoard] Deleting task: ${taskId}`);
+    
+    // Direct mutation call
+    deleteTaskMutation.mutate(taskId, {
+      onSuccess: () => {
+        console.log(`[KanbanBoard] Successfully deleted task: ${taskId}`);
+        setSelectedTask(null);
+      },
+      onError: (error) => {
+        console.error(`[KanbanBoard] Error deleting task:`, error);
+        // Use native alert for web compatibility
+        alert('Failed to delete task. Please try again.');
+      }
+    });
   };
 
   // Apply filters

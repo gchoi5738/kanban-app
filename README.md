@@ -117,9 +117,68 @@ npm install
 
 # Install backend dependencies
 cd backend
-pip install flask flask-cors flask-sqlalchemy
+pip install -r requirements.txt
 cd ..
 ```
+
+### Database Setup (PostgreSQL)
+
+1. **Install PostgreSQL**
+```bash
+# macOS (using Homebrew)
+brew install postgresql@14
+brew services start postgresql@14
+
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+```
+
+2. **Create Database and User**
+```bash
+# Connect to PostgreSQL
+psql postgres
+
+# Create database and user
+CREATE DATABASE kanban;
+CREATE USER kanban_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE kanban TO kanban_user;
+```
+
+3. **Environment Configuration**
+Create a `.env` file in the backend directory:
+```bash
+# backend/.env
+DATABASE_URL=postgresql://kanban_user:your_password@localhost:5432/kanban
+FLASK_ENV=development
+FLASK_APP=app.py
+FLASK_DEBUG=1
+```
+
+4. **Initialize Database Schema**
+```bash
+# In the backend directory
+flask db init
+flask db migrate -m "Initial migration"
+flask db upgrade
+```
+
+5. **Verify Connection**
+```bash
+# Using psql
+psql -U kanban_user -d kanban -h localhost
+
+# Or in Python shell
+python -c "from app import db; print(db.engine.connect())"
+```
+
+The PostgreSQL database will store:
+- Tasks (id, title, description, priority, due_date, assignee, section_id)
+- Sections (id, title, order)
+- Indexes on frequently queried fields
+- Foreign key constraints for data integrity
+
+**Note**: Make sure to add `.env` to your `.gitignore` file to keep sensitive information secure.
 
 2. **Start the Application**
 ```bash
@@ -132,7 +191,7 @@ cd kanban-app
 npx expo start --web
 ```
 
-The app will open in your browser at http://localhost:19006
+The app will open in your browser at http://localhost:8081
 
 ### Troubleshooting Common Issues
 

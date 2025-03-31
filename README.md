@@ -1,127 +1,185 @@
 # Kanban App
 
-A comprehensive Kanban board application built with React Native (frontend) and Flask with PostgreSQL (backend) that allows users to manage tasks across different stages of completion.
+A comprehensive Kanban board application built with React Native (Expo for web) and Flask with a local database. This app allows users to manage tasks across different stages of completion with a smooth drag-and-drop interface.
+
+## Development Process & Time Breakdown
+
+### Planning and Initial Setup (30 minutes)
+- Project structure planning
+- Setting up React Native with Expo
+- Configuring TypeScript and essential dependencies
+
+### Core UI Components (1 hour)
+- KanbanBoardScreen implementation
+- SectionColumn component
+- TaskCard component with animations
+- Basic drag and drop functionality
+
+### Task Management Features (45 minutes)
+- Task creation modal
+- Task detail view
+- Edit and delete functionality
+- Metadata handling (priority, dates, assignees)
+
+### Backend Development (45 minutes)
+- Flask API setup
+- Database models and migrations
+- API endpoints implementation
+- CORS configuration
+
+### Advanced Features (1 hour)
+- Drag and drop animations
+- Responsive design implementation
+- Filter system
+- Performance optimizations
+
+### Testing and Refinement (30 minutes)
+- Bug fixes
+- UI polish
+- Documentation
+
+Total Development Time: ~4 hours
+
+## Design Choices & Technical Decisions
+
+### Frontend Architecture
+1. **React Native + Expo Web**
+   - Chose Expo for rapid development and web deployment
+   - Enables future mobile deployment without code changes
+   - Provides excellent development tools and hot reloading
+
+2. **State Management**
+   - React Query for server state management
+   - Local state for UI components
+   - Optimistic updates for better UX
+
+3. **UI Components**
+   - Custom components for better control over styling and animations
+   - Responsive design using Flexbox
+   - Modular component structure for reusability
+
+### Backend Architecture
+1. **Flask + SQLite**
+   - Lightweight and easy to set up
+   - Suitable for demonstration purposes
+   - SQLite for simple data persistence without external dependencies
+
+2. **API Design**
+   - RESTful endpoints for CRUD operations
+   - Simple authentication-free design for demo purposes
+   - CORS enabled for local development
+
+### Alternative Approaches Considered
+
+1. **Frontend Alternatives**
+   - Pure React.js: Simpler but less portable to mobile
+   - Next.js: Better for production but overhead for demo
+   - Redux: Considered but React Query sufficient for demo
+
+2. **Backend Alternatives**
+   - Express.js: Familiar but Python better for quick setup
+   - Firebase: Good but overkill for demo
+   - MongoDB: Considered but SQLite simpler for demo
+
+3. **State Management Alternatives**
+   - Redux: Too heavy for current needs
+   - MobX: Good but React Query better for API data
+   - Context API: Used sparingly for theme/global state
 
 ## Features
 
-- **Configurable Sections**: Tasks can be moved between different configurable stages (e.g., To Do, Doing, Review, Done).
-- **Drag and Drop**: Smooth drag and drop functionality to move tasks between sections.
-- **Task Management**: Create, edit, and delete tasks with detailed metadata.
-- **Metadata Filtering**: Filter tasks across all stages by priority, due date, and assignee.
-- **Responsive Design**: Optimized for both portrait and landscape orientations.
-- **Persistent Storage**: PostgreSQL backend for reliable data storage.
-- **RESTful API**: Well-structured API for all task and section operations.
+- **Configurable Sections**: Tasks can be moved between different configurable stages
+- **Drag and Drop**: Intuitive drag and drop with smooth animations
+- **Task Management**: Create, edit, and delete tasks with detailed metadata
+- **Metadata Filtering**: Filter tasks by priority, due date, and assignee
+- **Responsive Design**: Optimized for both portrait and landscape
+- **Persistent Storage**: Backend database for reliable data storage
+- **RESTful API**: Well-structured API for all operations
 
-## Technical Implementation
-
-### Frontend Architecture
-
-- **Framework**: React Native 0.76 with Expo
-- **State Management**: @tanstack/react-query for data fetching, caching, and mutations
-- **Drag and Drop**: react-native-drax for task movement between sections
-- **UI Components**: FlatList for virtualized rendering of tasks and sections
-- **Navigation**: React Navigation for screen management
-
-### Backend Architecture
-
-- **Framework**: Flask with SQLAlchemy ORM
-- **Database**: PostgreSQL for reliable data persistence
-- **API**: RESTful API with JSON responses
-- **Validation**: Input validation and proper error handling
-- **Filtering**: Support for filtering tasks by various criteria
-
-### Development Time Breakdown
-
-- **Frontend Development**: ~3 hours
-  - Project setup and architecture planning
-  - Core components implementation
-  - Task management and filtering
-
-- **Backend Development**: ~1 hour
-  - Flask app setup
-  - Database models and migrations
-  - API endpoints implementation
-
-Total development time: ~4 hours
-
-## Getting Started
+## Quick Setup Guide
 
 ### Prerequisites
-
 - Node.js (v14 or later)
 - Python 3.8 or later
-- PostgreSQL 14 or later
-- Docker and Docker Compose (optional, for running PostgreSQL)
+- npm or yarn
+- Chrome (recommended)
 
-### Frontend Setup
+### One-Time Setup
 
-1. Install dependencies:
-   ```
-   npm install
-   ```
+1. **Clone and Install Dependencies**
+```bash
+# Clone the repository
+git clone <repository-url>
+cd kanban-app
 
-2. Start the development server:
-   ```
-   npx expo start
-   ```
+# Install frontend dependencies
+npm install
 
-### Backend Setup
+# Install backend dependencies
+cd backend
+pip install flask flask-cors flask-sqlalchemy
+cd ..
+```
 
-1. Start the PostgreSQL database:
-   ```
-   docker-compose up -d postgres
-   ```
+2. **Start the Application**
+```bash
+# Terminal 1: Start backend
+cd backend
+python -m flask run --port=5001
 
-2. Install Python dependencies:
-   ```
-   cd backend
-   pip install -r requirements.txt
-   ```
+# Terminal 2: Start frontend
+cd kanban-app
+npx expo start --web
+```
 
-3. Initialize the database:
-   ```
-   flask db init
-   flask db migrate -m "Initial migration"
-   flask db upgrade
-   ```
+The app will open in your browser at http://localhost:19006
 
-4. Seed the database with initial data:
-   ```
-   python seed.py
-   ```
+### Troubleshooting Common Issues
 
-5. Run the backend:
-   ```
-   python run.py
-   ```
+1. **Backend Issues**
+   - "No module named flask": Run `pip install flask`
+   - "Address in use": Change port in Flask command
+   - Database errors: Check permissions in backend/instance
 
-The API will be available at http://localhost:5000/api
+2. **Frontend Issues**
+   - Module errors: Run `npm install`
+   - White screen: Check console and retry with `--clear`
+   - API connection: Verify backend is running on port 5001
 
-## API Endpoints
-
-### Sections
-
-- `GET /api/sections`: Get all sections
-- `POST /api/sections`: Create a new section
-- `PUT /api/sections/:id`: Update a section
-- `DELETE /api/sections/:id`: Delete a section
+## API Reference
 
 ### Tasks
+- `GET /api/tasks`: Get all tasks
+- `POST /api/tasks`: Create task
+- `PUT /api/tasks/:id`: Update task
+- `DELETE /api/tasks/:id`: Delete task
 
-- `GET /api/tasks`: Get all tasks (with optional filters)
-- `POST /api/tasks`: Create a new task
-- `PUT /api/tasks/:id`: Update a task
-- `DELETE /api/tasks/:id`: Delete a task
+### Sections
+- `GET /api/sections`: Get all sections
 
 ## Future Enhancements
 
-- **Calendar View**: Display tasks on a calendar based on due dates
-- **User Authentication**: Add multi-user support with authentication
-- **Custom Section Creation**: Allow users to create and customize their own sections
-- **Advanced Filtering**: Add more complex filtering and sorting options
-- **Offline Support**: Add offline capability with synchronization when coming back online
-- **Analytics**: Add usage analytics to track board activity
+1. **Planned Features**
+   - User authentication
+   - Real-time updates
+   - Mobile app deployment
+   - Advanced filtering
+   - Calendar integration
 
-## Contributors
+2. **Technical Improvements**
+   - Unit and E2E tests
+   - CI/CD pipeline
+   - Production database
+   - Performance monitoring
+   - Error tracking
 
-- [Your Name] - Initial development
+## License
+
+This project is licensed under the MIT License.
+
+## Acknowledgments
+
+- React Native and Expo
+- Flask framework
+- React Query
+- React Native Drax

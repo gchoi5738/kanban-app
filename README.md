@@ -163,7 +163,17 @@ flask db migrate -m "Initial migration"
 flask db upgrade
 ```
 
-5. **Verify Connection**
+5. **Seed Initial Data**
+```bash
+# In the backend directory
+python -c 'from app import create_app, db; from seed import seed_database; app = create_app(); app.app_context().push(); seed_database()'
+```
+
+This will create:
+- 4 default sections (To Do, Doing, Review, Done)
+- 50 sample tasks distributed across these sections
+
+6. **Verify Connection**
 ```bash
 # Using psql
 psql -U kanban_user -d kanban -h localhost
@@ -199,6 +209,8 @@ The app will open in your browser at http://localhost:8081
    - "No module named flask": Run `pip install flask`
    - "Address in use": Change port in Flask command
    - Database errors: Check permissions in backend/instance
+   - Cannot create tasks: Ensure database is seeded by running the command in step 5 of Database Setup
+   - Empty sections list: Database needs to be seeded with initial data
 
 2. **Frontend Issues**
    - Module errors: Run `npm install`
